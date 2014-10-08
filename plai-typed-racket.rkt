@@ -9,68 +9,90 @@
        (struct cons-name ([field-name : field-type] ...) #:transparent) ...
        (define-type name (U cons-name ...)))]))
 
-(deftype expr-c
+(deftype Expr-C
   [num-c (n : Number)]
   [id-c (s : Symbol)]
-  [app-c (fun : Symbol) (arg : expr-c)]
-  [plus-c (l : expr-c) (r : expr-c)]
-  [mult-c (l : expr-c) (r : expr-c)])
+  [app-c (fun : Expr-C) (arg : Expr-C)]
+  [plus-c (l : Expr-C) (r : Expr-C)]
+  [mult-c (l : Expr-C) (r : Expr-C)]
+  [fd-c (name : Symbol) (arg : Symbol) (body : Expr-C)])
 
-(deftype fun-def-c
-  (fd-c (name : Symbol) (arg : Symbol) (body : expr-c)))
+(deftype Value
+  [num-v (n : Number)]
+  [fun-v (name : Symbol) (arg : Symbol) (body : Expr-C)])
 
 (deftype Binding
-  [bind (name : Symbol) (val : Number)])
+  [bind (name : Symbol) (val : Value)])
 
 (define-type Env (Listof Binding))
 (define mt-env empty)
 (define extend-env cons)
 
-(: interp (expr-c Env (Listof fun-def-c) -> Number))
-(define (interp expr env fds)
+(: interp (Expr-C Env -> Value))
+(define (interp expr env)
   (match expr
-    [(num-c n) n]
-    [(plus-c l r) (+ (interp l env fds) (interp r env fds))]
-    [(mult-c l r) (* (interp l env fds) (interp r env fds))]
-    [(app-c f a) (let ([fd : fun-def-c (get-fundef f fds)])
-                       (interp (fd-c-body fd)
-                               (extend-env (bind (fd-c-arg fd)
-                                                 (interp a env fds))
-                                           mt-env)
-                               fds))]
-    [(id-c n) (lookup n env)]))
+    [(num-c n) (num-v n)]
+    [(plus-c l r) (num+ (interp l env) (interp r env))]
+    [(mult-c l r) (num* (interp l env) (interp r env))]
+    [(app-c f arg-val) (match-let ([(fun-v name arg body) (interp f env)])
+                         (interp body
+                                 (extend-env (bind arg (interp arg-val env)) mt-env)))]
+    [(id-c n) (lookup n env)]
+    [(fd-c name arg body) (fun-v name arg body)]))
 
-(: lookup (Symbol Env -> Number))
+(: num+ (Value Value -> Value))
+(define/match (num+ a b)
+  [((num-v x) (num-v y)) (num-v (+ x y))]
+  [(_ _) (error 'num+ "one argument was not a number")])
+
+(: num* (Value Value -> Value))
+(define/match (num* a b)
+  [((num-v x) (num-v y)) (num-v (* x y))]
+  [(_ _) (error 'num* "one argument was not a number")])
+
+(: lookup (Symbol Env -> Value))
 (define (lookup name env)
    (let ([binding (findf (match-lambda [(bind n _) (symbol=? n name)]) env)])
      (if binding
          (bind-val binding)
          (error 'lookup "no such binding"))))
 
-(: get-fundef (Symbol (Listof fun-def-c) -> fun-def-c))
-(define (get-fundef name fds)
-  (or (findf (match-lambda [(fd-c n _ _) (symbol=? n name)]) fds)
-      (error "oops")))
+(check-equal? (interp (plus-c (num-c 10)
+                              (app-c (fd-c 'const5
+                                           '_
+                                           (num-c 5))
+                                     (num-c 10)))
+                      mt-env)
+              (num-v 15))
 
-(check-equal? (interp (plus-c (num-c 10) (app-c 'const-5 (num-c 10)))
-                      mt-env
-                      (list (fd-c 'const-5 '_ (num-c 5))))
-              15)
+(check-equal? (interp (plus-c (num-c 10)
+                              (app-c (fd-c 'double
+                                           'x
+                                           (plus-c (id-c 'x) (id-c 'x)))
+                                     (plus-c (num-c 1) (num-c 2))))
+                      mt-env)
+              (num-v 16))
 
-(check-equal? (interp (plus-c (num-c 10) (app-c 'double (plus-c (num-c 1) (num-c 2))))
-                      mt-env
-                      (list (fd-c 'double 'x (plus-c (id-c 'x) (id-c 'x)))))
-              16)
+(check-equal? (interp (plus-c (num-c 10)
+                              (app-c (fd-c 'quadruple
+                                           'x
+                                           (app-c (fd-c 'double
+                                                        'x
+                                                        (plus-c (id-c 'x) (id-c 'x)))
+                                                  (app-c (fd-c 'double
+                                                               'x
+                                                               (plus-c (id-c 'x) (id-c 'x)))
+                                                         (id-c 'x))))
+                                     (plus-c (num-c 1) (num-c 2))))
+                      mt-env)
+              (num-v 22))
 
-(check-equal? (interp (plus-c (num-c 10) (app-c 'quadruple (plus-c (num-c 1) (num-c 2))))
-                      mt-env
-                      (list (fd-c 'quadruple 'x (app-c 'double (app-c 'double (id-c 'x))))
-                            (fd-c 'double 'x (plus-c (id-c 'x) (id-c 'x)))))
-              22)
-
-(check-exn
- exn:fail?
- (lambda () (interp (app-c 'f1 (num-c 3))
-               mt-env
-               (list (fd-c 'f1 'x (app-c 'f2 (num-c 4)))
-                     (fd-c 'f2 'y (plus-c (id-c 'x) (id-c 'y)))))))
+(check-exn exn:fail?
+           (lambda () (interp (app-c (fd-c 'f1
+                                      'x
+                                      (app-c (fd-c 'f2
+                                                   'y
+                                                   (plus-c (id-c 'x) (id-c 'y)))
+                                             (num-c 4)))
+                                (num-c 3))
+                         mt-env)))
