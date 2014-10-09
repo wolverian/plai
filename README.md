@@ -18,7 +18,16 @@ abstract data types.
 
 [tr]: http://docs.racket-lang.org/ts-guide/index.html "Typed Racket Guide"
 
-## See also:
+## See also
 
-- The newer versions of the textbook, which use Pyret as the
-  implementation language: <http://papl.cs.brown.edu>.
+- The [newer versions][new] of the textbook, which use [Pyret][pyret] as the
+  implementation language.
+
+[new]: http://papl.cs.brown.edu "Programming and Programming Languages"
+
+[pyret]: http://www.pyret.org "Pyret"
+
+## License
+
+This software is available under the ISC license. See the LICENSE file
+for more information.
