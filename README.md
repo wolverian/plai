@@ -30,8 +30,8 @@ The tests run immediately when you load the program into Racket.
 
 ## See also
 
-- The [newer versions][new] of the textbook, which use [Pyret][pyret] as the
-  implementation language.
+- The [newer versions][new] of the textbook, which use [Pyret][pyret]
+  as the implementation language.
 
 [new]: http://papl.cs.brown.edu "Programming and Programming Languages"
 

@@ -168,7 +168,7 @@
   [((num-v x) (num-v y)) (num-v (* x y))]
   [(_ _) (error 'num* "one argument was not a number")])
 
-;; ** Support for mutable values
+;; ** Mutable values
 
 (: new-loc (-> Location))
 (define new-loc

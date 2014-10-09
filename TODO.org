@@ -1,8 +1,9 @@
-* TODO Features [1/4]
+* TODO Features [1/5]
   - [X] let to lambda
   - [ ] n-ary let
   - [ ] n-ary begin
   - [ ] variables
+  - [ ] type case
 * TODO Tests [3/4]
   - [X] sequencing
   - [X] application
