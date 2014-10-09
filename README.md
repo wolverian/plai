@@ -18,6 +18,16 @@ abstract data types.
 
 [tr]: http://docs.racket-lang.org/ts-guide/index.html "Typed Racket Guide"
 
+## Instructions
+
+### Running
+
+Load `plai-typed-racket.rkt` into Racket.
+
+### Tests
+
+The tests run immediately when you load the program into Racket.
+
 ## See also
 
 - The [newer versions][new] of the textbook, which use [Pyret][pyret] as the
