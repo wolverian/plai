@@ -2,7 +2,7 @@
 
 (require typed/rackunit)
 
-;; * Type support
+;; * Common type support
 
 ;;   Unfortunately there's no `match-type` yet. PLAI has one, which
 ;;   requires you to say `(match TypeName expr cases)`. I'd like to do it
@@ -95,7 +95,7 @@
               (seq-c (app-c (id-c 'x) (num-c 1))
                      (app-c (id-c 'y) (num-c 2))))
 
-;; * Interpreter
+;; * Interpreter types
 
 ;; ** Values
 
@@ -128,7 +128,8 @@
 (deftype Result
   [v*s (v : Value) (s : Store)])
 
-;; ** The interpreter itself
+
+;; * Interpreter
 
 (: interp (Expr-C Env Store -> Result))
 (define (interp expr env store)
@@ -154,6 +155,7 @@
     [(seq-c a b) (match-let ([(v*s v s) (interp a env store)])
                    (interp b env s))]))
 
+;; * Interpreter support
 ;; ** Numerics
 
 (: num+ (Value Value -> Value))
