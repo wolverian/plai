@@ -16,15 +16,12 @@
   [plus-c (l : Expr-C) (r : Expr-C)]
   [mult-c (l : Expr-C) (r : Expr-C)]
   [lam-c (arg : Symbol) (body : Expr-C)]
-  [box-c (arg : Expr-C)]
-  [unbox-c (arg : Expr-C)]
-  [set-box-c (b : Expr-C) (v : Expr-C)]
+  [set-c (var : Symbol) (arg : Expr-C)]
   [seq-c (b1 : Expr-C) (b2 : Expr-C)])
 
 (deftype Value
   [num-v (n : Number)]
-  [clos-v (arg : Symbol) (body : Expr-C) (env : Env)]
-  [box-v (v : Location)])
+  [clos-v (arg : Symbol) (body : Expr-C) (env : Env)])
 
 (define-type Location Number)
 
@@ -63,16 +60,9 @@
                                  (override-store (cell where a-v) a-s)))]
     [(id-c n) (v*s (fetch (lookup n env) store) store)]
     [(lam-c arg body) (v*s (clos-v arg body env) store)]
-    [(box-c a) (match-let ([(v*s v s) (interp a env store)])
-                 (let ([where (new-loc)])
-                   (v*s (box-v where)
-                        (override-store (cell where v)
-                                        s))))]
-    [(unbox-c a) (match-let ([(v*s (box-v loc) s) (interp a env store)])
-                   (v*s (fetch loc s) s))]
-    [(set-box-c b v) (match-let* ([(v*s (box-v loc) s-b) (interp b env store)]
-                                  [(v*s v-v s-v) (interp v env s-b)])
-                       (v*s v-v (override-store (cell loc v-v) s-v)))]
+    [(set-c var val) (match-let ([(v*s v-val s-val) (interp val env store)]
+                                 [where (lookup var env)])
+                       (v*s v-val (override-store (cell where v-val) store)))]
     [(seq-c a b) (match-let ([(v*s v s) (interp a env store)])
                    (interp b env s))]))
 
