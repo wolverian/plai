@@ -1,9 +1,10 @@
-* TODO Tests [0/4]
-  - [ ] sequencing
-  - [ ] application
-  - [ ] lambda
-  - [ ] boxes
-
-* TODO Features [0/3]
-  - [ ] let to lambda
-  - [ ] n-ary begin to let
+* TODO Features [1/4]
+  - [X] let to lambda
+  - [ ] n-ary let
+  - [ ] n-ary begin
+  - [ ] variables
+* TODO Tests [3/4]
+  - [X] sequencing
+  - [X] application
+  - [X] lambda
+  - [ ] variables
