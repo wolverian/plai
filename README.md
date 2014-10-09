@@ -1,6 +1,6 @@
 # PLAI in Typed Racket
 
-This is an implementation of the code of the
+This is an ongoing implementation of the code of the
 [Programming Languages: Application and Interpretation][plai],
 [2012 version][].
 
